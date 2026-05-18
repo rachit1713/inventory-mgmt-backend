@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rachit1713/inventory-mgmt-backend/data"
@@ -11,7 +12,20 @@ import (
 var inventories = data.MockInventories // start with mock data
 
 func GetInventories(c *gin.Context) {
-	c.JSON(http.StatusOK, inventories)
+	search := c.Query("search")
+	var result []models.Inventory
+
+	if search == "" {
+		result = inventories
+	} else {
+		for _, inv := range inventories {
+			if strings.Contains(strings.ToLower(inv.Name), strings.ToLower(search)) {
+				result = append(result, inv)
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 type UpdateRequest struct {
